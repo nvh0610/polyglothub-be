@@ -1,4 +1,4 @@
-package configs
+package config
 
 import (
 	"fmt"
@@ -28,19 +28,21 @@ const (
 )
 
 func (*MySQLConfig) IPEnv() string {
-	return StringEnv(`MYSQL_IP`)
+	host := StringEnv(`DATABASE__HOST`)
+	port := StringEnv(`DATABASE__PORT`)
+	return fmt.Sprintf("%s:%s", host, port)
 }
 
 func (*MySQLConfig) UsernameEnv() string {
-	return StringEnv(`MYSQL_USERNAME`)
+	return StringEnv(`DATABASE__USER`)
 }
 
 func (*MySQLConfig) PasswordEnv() string {
-	return StringEnv(`MYSQL_PASSWORD`)
+	return StringEnv(`DATABASE__PASSWORD`)
 }
 
 func (*MySQLConfig) DatabaseEnv() string {
-	return StringEnv(`MYSQL_DATABASE`)
+	return StringEnv(`DATABASE__NAME`)
 }
 
 func (c *MySQLConfig) LoadUriEnv() {
