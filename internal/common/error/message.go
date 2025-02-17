@@ -13,8 +13,9 @@ var MsgFlags = map[int]string{
 	UNAUTHORIZED:           "Unauthorized",
 	INTERNAL_SERVER:        "Internal server",
 	FORBIDDEN:              "Not allow to process action",
-	EXISTING_USER:          "User existed",
+	USER_EXIST:             "User existed",
 	CREATE_USER_FAILED:     "Create user failed",
+	UPDATE_USER_FAILED:     "Update user failed",
 }
 
 func InitErrMsg() {

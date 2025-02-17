@@ -42,6 +42,9 @@ func InitRouter() chi.Router {
 	r.Route("/user", func(r chi.Router) {
 		r.Get("/{id}", baseController.UserCtrl.GetUserById)
 		r.Post("/", baseController.UserCtrl.CreateUser)
+		r.Put("/{id}", baseController.UserCtrl.UpdateUser)
+		r.Delete("/{id}", baseController.UserCtrl.DeleteUser)
+		r.Get("/", baseController.UserCtrl.ListUser)
 	})
 
 	return r

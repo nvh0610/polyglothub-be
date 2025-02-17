@@ -3,7 +3,6 @@ package mysqldb
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	gormLogger "gorm.io/gorm/logger"
@@ -20,7 +19,6 @@ func NewMysqlConnection() (*gorm.DB, error) {
 	opts := config.MySQLConfig{}
 	opts.LoadEnvs()
 	dsn := opts.BuildConnection()
-	fmt.Println("dsn", dsn)
 
 	logger.InfoF("Connect to database [%s] ...", opts.IP)
 

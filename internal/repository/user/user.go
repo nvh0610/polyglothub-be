@@ -18,6 +18,11 @@ func (u *Implement) GetById(id int) (entity.User, error) {
 	return user, u.db.First(&user, "id = ?", id).Error
 }
 
+func (u *Implement) CheckExistsByUsername(username string) (bool, error) {
+	var user entity.User
+	return user.Id != 0, u.db.First(&user, "username = ?", username).Error
+}
+
 func (u *Implement) List(limit, offset int) ([]entity.User, error) {
 	var users []entity.User
 	return users, u.db.Limit(limit).Offset(offset).Find(&users).Error

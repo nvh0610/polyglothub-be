@@ -8,4 +8,5 @@ type Repository interface {
 	Create(user *entity.User) error
 	Update(user *entity.User) error
 	Delete(id int) error
+	CheckExistsByUsername(username string) (bool, error)
 }
