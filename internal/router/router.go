@@ -39,7 +39,10 @@ func InitRouter() chi.Router {
 
 	baseRepo := repository.NewRegistryRepo(mysqlConn)
 	baseController := controller.NewRegistryController(baseRepo)
-	r.Get("/user/{id}", baseController.UserCtrl.GetUserById)
+	r.Route("/user", func(r chi.Router) {
+		r.Get("/{id}", baseController.UserCtrl.GetUserById)
+		r.Post("/", baseController.UserCtrl.CreateUser)
+	})
 
 	return r
 }
