@@ -2,6 +2,12 @@ package entity
 
 import "time"
 
+const (
+	USER_ROLE_ADMIN      = "admin"
+	USER_ROLE_USER       = "user"
+	USER_ROLE_SUPERADMIN = "superadmin"
+)
+
 type User struct {
 	Id        int       `json:"id" gorm:"id"`
 	Username  string    `json:"username" gorm:"username"`

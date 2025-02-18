@@ -25,18 +25,18 @@ func ToDetailUserResponse(user *entity.User) *DetailUserResponse {
 	}
 }
 
-func ToListUserResponse(users []entity.User) []*DetailUserResponse {
+func ToListUserResponse(users []*entity.User) []*DetailUserResponse {
 	var res []*DetailUserResponse
 	for _, user := range users {
-		res = append(res, ToDetailUserResponse(&user))
+		res = append(res, ToDetailUserResponse(user))
 	}
 	return res
 }
 
 type PaginationResponse struct {
-	Total int `json:"total"`
-	Limit int `json:"limit"`
-	Page  int `json:"page"`
+	TotalPage int `json:"total_page"`
+	Limit     int `json:"limit"`
+	Page      int `json:"page"`
 }
 
 type ListUserResponse struct {

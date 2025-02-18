@@ -49,6 +49,12 @@ func (u *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	isValidRole := IsValidRole(req.Role)
+	if !isValidRole {
+		resp.Return(w, http.StatusBadRequest, customStatus.INVALID_PARAMS, nil)
+		return
+	}
+
 	userExist, err := u.repo.User().CheckExistsByUsername(req.Username)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		resp.Return(w, http.StatusInternalServerError, customStatus.INTERNAL_SERVER, err.Error())
@@ -120,22 +126,23 @@ func (u *UserController) DeleteUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u *UserController) ListUser(w http.ResponseWriter, r *http.Request) {
-	params := r.URL.Query()
+	page, limit := utils.SetDefaultPagination(r.URL.Query())
+	offset := (page - 1) * limit
 
-	limit, _ := strconv.Atoi(params.Get("limit"))
-	if limit == 0 {
-		limit = 10
-	}
-
-	offset, _ := strconv.Atoi(params.Get("offset"))
-	if offset <= 0 {
-		offset = 0
-	}
-	users, err := u.repo.User().List(limit, offset)
+	users, total, err := u.repo.User().List(limit, offset)
 	if err != nil {
 		resp.Return(w, http.StatusInternalServerError, customStatus.INTERNAL_SERVER, err.Error())
 		return
 	}
 
-	resp.Return(w, http.StatusOK, customStatus.SUCCESS, response.ToListUserResponse(users))
+	data := response.ListUserResponse{
+		Users: response.ToListUserResponse(users),
+		PaginationResponse: response.PaginationResponse{
+			TotalPage: utils.CalculatorTotalPage(total, limit),
+			Limit:     limit,
+			Page:      page,
+		},
+	}
+
+	resp.Return(w, http.StatusOK, customStatus.SUCCESS, data)
 }
