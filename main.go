@@ -27,7 +27,7 @@ func main() {
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	log.Printf("[info] start http server listening %s", ":8000")
+	log.Printf("[info] start http server listening%s", ":8000")
 
 	err := server.ListenAndServe()
 	if err != nil {

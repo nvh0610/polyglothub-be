@@ -13,9 +13,14 @@ func NewUserRepository(db *gorm.DB) *Implement {
 	return &Implement{db: db}
 }
 
-func (u *Implement) GetById(id int) (entity.User, error) {
-	var user entity.User
+func (u *Implement) GetById(id int) (*entity.User, error) {
+	var user *entity.User
 	return user, u.db.First(&user, "id = ?", id).Error
+}
+
+func (u *Implement) GetByUsername(username string) (*entity.User, error) {
+	var user *entity.User
+	return user, u.db.First(&user, "username = ?", username).Error
 }
 
 func (u *Implement) CheckExistsByUsername(username string) (bool, error) {

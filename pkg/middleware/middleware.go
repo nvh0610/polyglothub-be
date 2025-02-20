@@ -17,8 +17,7 @@ func JwtMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		splitToken := strings.Split(authHeader, "Bearer")
-
+		splitToken := strings.Split(authHeader, "Bearer ")
 		if len(splitToken) != 2 {
 			resp.Return(w, http.StatusUnauthorized, customStatus.UNAUTHORIZED, "Authorization header is invalid")
 			return

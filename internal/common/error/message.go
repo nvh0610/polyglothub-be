@@ -16,6 +16,7 @@ var MsgFlags = map[int]string{
 	USER_EXIST:             "User existed",
 	CREATE_USER_FAILED:     "Create user failed",
 	UPDATE_USER_FAILED:     "Update user failed",
+	USER_NOT_ADMIN:         "User not admin",
 }
 
 func InitErrMsg() {

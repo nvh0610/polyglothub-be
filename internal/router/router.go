@@ -8,6 +8,7 @@ import (
 	"learn/internal/controller"
 	"learn/internal/repository"
 	"learn/pkg/logger"
+	mdw "learn/pkg/middleware"
 	"learn/pkg/resp"
 	"learn/platform/mysqldb"
 	"net/http"
@@ -39,7 +40,12 @@ func InitRouter() chi.Router {
 
 	baseRepo := repository.NewRegistryRepo(mysqlConn)
 	baseController := controller.NewRegistryController(baseRepo)
+	r.Route("/auth", func(r chi.Router) {
+		r.Post("/login", baseController.AuthCtrl.Login)
+		r.With(mdw.JwtMiddleware).Post("/change-password", baseController.AuthCtrl.ChangePassword)
+	})
 	r.Route("/user", func(r chi.Router) {
+		r.Use(mdw.JwtMiddleware)
 		r.Get("/{id}", baseController.UserCtrl.GetUserById)
 		r.Post("/", baseController.UserCtrl.CreateUser)
 		r.Put("/{id}", baseController.UserCtrl.UpdateUser)

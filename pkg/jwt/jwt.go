@@ -15,7 +15,7 @@ var (
 
 var (
 	secretKey = config.StringEnv("JWT_SECRET_KEY")
-	jwtExp    = config.IntEnvF("JWT_EXP", 24)
+	jwtExp    = time.Duration(config.IntEnv("JWT_EXP")) * time.Minute
 )
 
 type Payload struct {
@@ -29,7 +29,7 @@ func GenerateToken(id int, role string) (string, error) {
 		UserID: id,
 		Role:   role,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Duration(jwtExp) * time.Hour).Unix(),
+			ExpiresAt: time.Now().Add(jwtExp).Unix(),
 		},
 	}
 

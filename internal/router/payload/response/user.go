@@ -43,3 +43,7 @@ type ListUserResponse struct {
 	PaginationResponse
 	Users []*DetailUserResponse `json:"users"`
 }
+
+type LoginResponse struct {
+	AccessToken string `json:"access_token"`
+}
