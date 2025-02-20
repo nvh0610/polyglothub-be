@@ -20,3 +20,17 @@ type ChangePasswordRequest struct {
 	OldPassword string `json:"old_password" validate:"required"`
 	NewPassword string `json:"new_password" validate:"required"`
 }
+
+type ForgetPasswordRequest struct {
+	Username string `json:"username" validate:"required"`
+}
+
+type VerifyOtpRequest struct {
+	Username string `json:"username" validate:"required"`
+	Otp      string `json:"otp" validate:"required"`
+}
+
+type ResetPasswordRequest struct {
+	Username string `json:"username" validate:"required"`
+	Password string `json:"password" validate:"required"`
+}

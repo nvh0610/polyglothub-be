@@ -1,1 +1,1 @@
-ALTER TABLE DROP COLUMN fullname;
+ALTER TABLE users DROP COLUMN fullname;

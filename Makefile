@@ -17,10 +17,13 @@ migrate-down:
 
 docker-run:
 	docker run --name mysql-learn-language -e MYSQL_ROOT_PASSWORD=123456 -e MYSQL_DATABASE=learn-language -p 3306:3306 -d mysql:latest
+	docker run --name redis-learn-language -p 6379:6379 -d redis:latest
 
 docker-stop:
 	docker stop mysql-learn-language
 	docker rm mysql-learn-language
+	docker stop redis-learn-language
+	docker rm redis-learn-language
 
 
 setup:

@@ -7,10 +7,12 @@ import (
 	customStatus "learn/internal/common/error"
 	"learn/internal/controller"
 	"learn/internal/repository"
+	"learn/job/schedule"
 	"learn/pkg/logger"
 	mdw "learn/pkg/middleware"
 	"learn/pkg/resp"
 	"learn/platform/mysqldb"
+	"learn/platform/redisdb"
 	"net/http"
 )
 
@@ -33,17 +35,28 @@ func InitRouter() chi.Router {
 		resp.Return(writer, http.StatusOK, customStatus.SUCCESS, "success")
 	})
 
+	schedule.Start()
 	mysqlConn, err := mysqldb.NewMysqlConnection()
 	if err != nil {
 		logger.Error(err.Error())
 	}
 
+	redisConn, err := redisdb.NewRedisConnection()
+	if err != nil {
+		logger.Error(err.Error())
+	}
+
 	baseRepo := repository.NewRegistryRepo(mysqlConn)
-	baseController := controller.NewRegistryController(baseRepo)
+	baseController := controller.NewRegistryController(baseRepo, redisConn)
+
 	r.Route("/auth", func(r chi.Router) {
 		r.Post("/login", baseController.AuthCtrl.Login)
+		r.Post("/forget-password", baseController.AuthCtrl.ForgetPassword)
+		r.Post("/verify-otp", baseController.AuthCtrl.VerifyOtp)
+		r.Post("/reset-password", baseController.AuthCtrl.ResetPassword)
 		r.With(mdw.JwtMiddleware).Post("/change-password", baseController.AuthCtrl.ChangePassword)
 	})
+
 	r.Route("/user", func(r chi.Router) {
 		r.Use(mdw.JwtMiddleware)
 		r.Get("/{id}", baseController.UserCtrl.GetUserById)
