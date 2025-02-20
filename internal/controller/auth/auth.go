@@ -158,6 +158,17 @@ func (a *AuthController) VerifyOtp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	exist, err := a.redis.Exists(r.Context(), fmt.Sprintf(OTP_KEY, user.Id)).Result()
+	if err != nil {
+		resp.Return(w, http.StatusInternalServerError, customStatus.INTERNAL_SERVER, err.Error())
+		return
+	}
+
+	if exist != 1 {
+		resp.Return(w, http.StatusForbidden, customStatus.FORBIDDEN, nil)
+		return
+	}
+
 	otp, err := a.redis.Get(r.Context(), fmt.Sprintf(OTP_KEY, user.Id)).Result()
 	if err != nil {
 		resp.Return(w, http.StatusInternalServerError, customStatus.INTERNAL_SERVER, err.Error())
@@ -197,6 +208,17 @@ func (a *AuthController) ResetPassword(w http.ResponseWriter, r *http.Request) {
 		}
 
 		resp.Return(w, http.StatusInternalServerError, customStatus.INTERNAL_SERVER, err.Error())
+		return
+	}
+
+	exist, err := a.redis.Exists(r.Context(), fmt.Sprintf(VALIDATE_OTP_KEY, user.Id)).Result()
+	if err != nil {
+		resp.Return(w, http.StatusInternalServerError, customStatus.INTERNAL_SERVER, err.Error())
+		return
+	}
+
+	if exist != 1 {
+		resp.Return(w, http.StatusForbidden, customStatus.FORBIDDEN, nil)
 		return
 	}
 

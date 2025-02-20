@@ -14,7 +14,6 @@ import (
 func NewRedisConnection() (*redis.Client, error) {
 	opt := config.RedisConfig{}
 	opt.LoadEnvs()
-	fmt.Println(opt)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
