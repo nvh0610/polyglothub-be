@@ -33,12 +33,6 @@ func ToListUserResponse(users []*entity.User) []*DetailUserResponse {
 	return res
 }
 
-type PaginationResponse struct {
-	TotalPage int `json:"total_page"`
-	Limit     int `json:"limit"`
-	Page      int `json:"page"`
-}
-
 type ListUserResponse struct {
 	PaginationResponse
 	Users []*DetailUserResponse `json:"users"`

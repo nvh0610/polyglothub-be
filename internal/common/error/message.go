@@ -18,6 +18,9 @@ var MsgFlags = map[int]string{
 	UPDATE_USER_FAILED:     "Update user failed",
 	USER_NOT_ADMIN:         "User not admin",
 	WRONG_OTP:              "Wrong otp",
+	CREATE_CATEGORY_FAILED: "Create category failed",
+	CATEGORY_NOT_FOUND:     "Category not found",
+	UPDATE_CATEGORY_FAILED: "Update category failed",
 }
 
 func InitErrMsg() {

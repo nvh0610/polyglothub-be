@@ -132,11 +132,7 @@ func (a *AuthController) ForgetPassword(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	err = a.sendEmail.SendOtp(user.Username, randomOtp)
-	if err != nil {
-		resp.Return(w, http.StatusInternalServerError, customStatus.INTERNAL_SERVER, err.Error())
-		return
-	}
+	go a.sendEmail.SendOtp(user.Username, randomOtp)
 	resp.Return(w, http.StatusOK, customStatus.SUCCESS, nil)
 }
 
@@ -222,22 +218,6 @@ func (a *AuthController) ResetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	validateOtp, err := a.redis.Get(r.Context(), fmt.Sprintf(VALIDATE_OTP_KEY, user.Id)).Result()
-	if err != nil {
-		resp.Return(w, http.StatusInternalServerError, customStatus.INTERNAL_SERVER, err.Error())
-		return
-	}
-
-	if validateOtp != "1" {
-		resp.Return(w, http.StatusForbidden, customStatus.FORBIDDEN, nil)
-		return
-	}
-
-	if err = a.redis.Del(r.Context(), fmt.Sprintf(VALIDATE_OTP_KEY, user.Id)).Err(); err != nil {
-		resp.Return(w, http.StatusInternalServerError, customStatus.INTERNAL_SERVER, err.Error())
-		return
-	}
-
 	hashedPassword, err := password.HashPassword(req.Password)
 	if err != nil {
 		resp.Return(w, http.StatusInternalServerError, customStatus.INTERNAL_SERVER, err.Error())
@@ -247,6 +227,11 @@ func (a *AuthController) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	user.Password = hashedPassword
 	err = a.repo.User().Update(user)
 	if err != nil {
+		resp.Return(w, http.StatusInternalServerError, customStatus.INTERNAL_SERVER, err.Error())
+		return
+	}
+
+	if err = a.redis.Del(r.Context(), fmt.Sprintf(VALIDATE_OTP_KEY, user.Id)).Err(); err != nil {
 		resp.Return(w, http.StatusInternalServerError, customStatus.INTERNAL_SERVER, err.Error())
 		return
 	}

@@ -15,7 +15,7 @@ var (
 
 var (
 	secretKey = config.StringEnv("JWT_SECRET_KEY")
-	jwtExp    = time.Duration(config.IntEnv("JWT_EXP")) * time.Minute
+	jwtExp    = time.Duration(config.IntEnv("JWT_EXP")) * time.Hour
 )
 
 type Payload struct {

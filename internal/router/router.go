@@ -57,6 +57,14 @@ func InitRouter() chi.Router {
 		r.With(mdw.JwtMiddleware).Post("/change-password", baseController.AuthCtrl.ChangePassword)
 	})
 
+	r.Route("/category", func(r chi.Router) {
+		r.Use(mdw.JwtMiddleware)
+		r.Get("/", baseController.CategoryCtrl.ListCategory)
+		r.Post("/", baseController.CategoryCtrl.CreateCategory)
+		r.Put("/{id}", baseController.CategoryCtrl.UpdateCategory)
+		r.Delete("/{id}", baseController.CategoryCtrl.DeleteCategory)
+	})
+
 	r.Route("/user", func(r chi.Router) {
 		r.Use(mdw.JwtMiddleware)
 		r.Get("/{id}", baseController.UserCtrl.GetUserById)
