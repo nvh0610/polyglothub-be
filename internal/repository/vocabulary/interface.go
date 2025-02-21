@@ -7,5 +7,5 @@ type Repository interface {
 	Create(user *entity.Vocabulary) error
 	Update(user *entity.Vocabulary) error
 	Delete(id int) error
-	List(limit, offset int, categoryId int) ([]*entity.Vocabulary, int, error)
+	List(limit, offset int, categoryId int, word string) ([]*Vocabularies, int, error)
 }

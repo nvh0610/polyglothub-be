@@ -34,10 +34,7 @@ func (u *Implement) List(limit, offset int, userId int) ([]*entity.Category, int
 	var count int64
 
 	query := u.db.Limit(limit).Offset(offset)
-	if userId != 0 {
-		query = query.Where("user_id = ? OR user_id = 0", userId)
-	}
-
+	query = query.Where("user_id = ? OR user_id = 0", userId)
 	err := query.Find(&categories).Error
 	if err != nil {
 		return nil, 0, err
@@ -48,4 +45,12 @@ func (u *Implement) List(limit, offset int, userId int) ([]*entity.Category, int
 	}
 
 	return categories, int(count), err
+}
+
+func (u *Implement) GetByIdAndUserId(id int, userId int) (*entity.Category, error) {
+	var category *entity.Category
+	if userId == 0 {
+		return category, u.db.First(&category, "id = ?", id).Error
+	}
+	return category, u.db.First(&category, "id = ? AND user_id = ?", id, userId).Error
 }
