@@ -19,7 +19,7 @@ type CategoryController struct {
 	repo repository.Registry
 }
 
-func NewUserController(categoryRepo repository.Registry) Controller {
+func NewCategoryController(categoryRepo repository.Registry) Controller {
 	return &CategoryController{
 		repo: categoryRepo,
 	}

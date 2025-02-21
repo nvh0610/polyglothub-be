@@ -18,6 +18,6 @@ func NewRegistryController(repo repository.Registry, redis *redis.Client) *Regis
 	return &RegistryController{
 		UserCtrl:     user.NewUserController(repo),
 		AuthCtrl:     auth.NewAuthController(repo, redis),
-		CategoryCtrl: category.NewUserController(repo),
+		CategoryCtrl: category.NewCategoryController(repo),
 	}
 }

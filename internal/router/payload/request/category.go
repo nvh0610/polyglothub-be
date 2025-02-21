@@ -8,7 +8,3 @@ type CreateCategoryRequest struct {
 type UpdateCategoryRequest struct {
 	Name string `json:"name" validate:"required"`
 }
-
-type DeleteCategoryRequest struct {
-	Id int `json:"id" validate:"required"`
-}

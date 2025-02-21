@@ -30,7 +30,7 @@ func (u *Implement) Delete(id int) error {
 }
 
 func (u *Implement) List(limit, offset int, userId int) ([]*entity.Category, int, error) {
-	var users []*entity.Category
+	var categories []*entity.Category
 	var count int64
 
 	query := u.db.Limit(limit).Offset(offset)
@@ -38,7 +38,7 @@ func (u *Implement) List(limit, offset int, userId int) ([]*entity.Category, int
 		query = query.Where("user_id = ? OR user_id = 0", userId)
 	}
 
-	err := query.Find(&users).Error
+	err := query.Find(&categories).Error
 	if err != nil {
 		return nil, 0, err
 	}
@@ -47,5 +47,5 @@ func (u *Implement) List(limit, offset int, userId int) ([]*entity.Category, int
 		return nil, 0, err
 	}
 
-	return users, int(count), err
+	return categories, int(count), err
 }

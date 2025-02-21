@@ -1,0 +1,11 @@
+package vocabulary
+
+import "learn/internal/entity"
+
+type Repository interface {
+	GetById(id int) (*entity.Vocabulary, error)
+	Create(user *entity.Vocabulary) error
+	Update(user *entity.Vocabulary) error
+	Delete(id int) error
+	List(limit, offset int, categoryId int) ([]*entity.Vocabulary, int, error)
+}
