@@ -51,7 +51,10 @@ func (u *Implement) CreateBatch(examples []*entity.Example) error {
 }
 
 func (u *Implement) UpsertBatch(examples []*entity.Example) error {
-	return u.db.Clauses(clause.OnConflict{DoNothing: true}).Create(examples).Error
+	return u.db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "id"}},
+		DoUpdates: clause.AssignmentColumns([]string{"sentence", "meaning"}),
+	}).Create(examples).Error
 }
 
 func (u *Implement) DeleteByVocabularyId(vocabularyId int) error {

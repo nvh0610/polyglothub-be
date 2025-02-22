@@ -120,11 +120,13 @@ func (v *VocabularyController) UpdateVocabulary(w http.ResponseWriter, r *http.R
 		inputVocabulary.Id = idInt
 		err = v.repo.Vocabulary().Update(inputVocabulary)
 		if err != nil {
-			fmt.Println("err", err)
 			return err
 		}
 
+		fmt.Println("inputVocabulary", inputVocabulary.Id)
 		inputExample := example.ToModelExampleEntities(req.Examples, inputVocabulary.Id)
+		fmt.Println("inputExample", inputExample[0].Id)
+		fmt.Println("inputExample", inputExample[1].Id)
 
 		err = v.repo.Example().UpsertBatch(inputExample)
 		if err != nil {
