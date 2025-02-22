@@ -2,8 +2,12 @@ package user
 
 import "learn/internal/entity"
 
+func IsValidUserRole(role string) bool {
+	return role == entity.USER_ROLE_USER
+}
+
 func IsValidRole(role string) bool {
-	return role == entity.USER_ROLE_ADMIN || role == entity.USER_ROLE_USER
+	return role == entity.USER_ROLE_USER || role == entity.USER_ROLE_ADMIN || role == entity.USER_ROLE_SUPERADMIN
 }
 
 func IsValidAdminRole(role string) bool {

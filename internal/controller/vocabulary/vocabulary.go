@@ -2,6 +2,7 @@ package vocabulary
 
 import (
 	"errors"
+	"fmt"
 	"github.com/go-chi/chi/v5"
 	"gorm.io/gorm"
 	customStatus "learn/internal/common/error"
@@ -115,9 +116,11 @@ func (v *VocabularyController) UpdateVocabulary(w http.ResponseWriter, r *http.R
 	}
 
 	err = v.repo.DoInTx(func(txRepo repository.Registry) error {
-		inputVocabulary := ToModelUpdateVocabularyEntity(req)
+		inputVocabulary := ToModelUpdateVocabularyEntity(req, vocabulary)
+		inputVocabulary.Id = idInt
 		err = v.repo.Vocabulary().Update(inputVocabulary)
 		if err != nil {
+			fmt.Println("err", err)
 			return err
 		}
 
@@ -195,7 +198,7 @@ func (v *VocabularyController) DeleteVocabulary(w http.ResponseWriter, r *http.R
 
 func (v *VocabularyController) ListVocabulary(w http.ResponseWriter, r *http.Request) {
 	page, limit := utils.SetDefaultPagination(r.URL.Query())
-	userId, role := utils.GetUserIdAndRoleFromContext(r)
+	userId, _ := utils.GetUserIdAndRoleFromContext(r)
 	categoryId, _ := strconv.Atoi(r.URL.Query().Get("category_id"))
 	word := r.URL.Query().Get("word")
 	offset := (page - 1) * limit
@@ -211,12 +214,12 @@ func (v *VocabularyController) ListVocabulary(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	if !user.IsValidAdminRole(role) && category.UserID != userId {
+	if category.UserID != 0 && category.UserID != userId {
 		resp.Return(w, http.StatusForbidden, customStatus.FORBIDDEN, nil)
 		return
 	}
 
-	vocabularies, total, err := v.repo.Vocabulary().List(categoryId, offset, limit, word)
+	vocabularies, total, err := v.repo.Vocabulary().List(limit, offset, categoryId, word)
 	if err != nil {
 		resp.Return(w, http.StatusInternalServerError, customStatus.INTERNAL_SERVER, err.Error())
 		return

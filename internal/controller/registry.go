@@ -5,19 +5,22 @@ import (
 	"learn/internal/controller/auth"
 	"learn/internal/controller/category"
 	"learn/internal/controller/user"
+	"learn/internal/controller/vocabulary"
 	"learn/internal/repository"
 )
 
 type RegistryController struct {
-	UserCtrl     user.Controller
-	AuthCtrl     auth.Controller
-	CategoryCtrl category.Controller
+	UserCtrl       user.Controller
+	AuthCtrl       auth.Controller
+	CategoryCtrl   category.Controller
+	VocabularyCtrl vocabulary.Controller
 }
 
 func NewRegistryController(repo repository.Registry, redis *redis.Client) *RegistryController {
 	return &RegistryController{
-		UserCtrl:     user.NewUserController(repo),
-		AuthCtrl:     auth.NewAuthController(repo, redis),
-		CategoryCtrl: category.NewCategoryController(repo),
+		UserCtrl:       user.NewUserController(repo),
+		AuthCtrl:       auth.NewAuthController(repo, redis),
+		CategoryCtrl:   category.NewCategoryController(repo),
+		VocabularyCtrl: vocabulary.NewVocabularyController(repo),
 	}
 }

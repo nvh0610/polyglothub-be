@@ -2,6 +2,7 @@ package user
 
 import (
 	"errors"
+	"fmt"
 	"github.com/go-chi/chi/v5"
 	"gorm.io/gorm"
 	customStatus "learn/internal/common/error"
@@ -43,19 +44,13 @@ func (u *UserController) GetUserById(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
-	role := r.Context().Value("role").(string)
-	if !IsValidAdminRole(role) {
-		resp.Return(w, http.StatusForbidden, customStatus.FORBIDDEN, nil)
-		return
-	}
-
 	req := &request.CreateUserRequest{}
 	if err := utils.BindAndValidate(r, req); err != nil {
 		resp.Return(w, http.StatusBadRequest, customStatus.INVALID_PARAMS, err.Error())
 		return
 	}
 
-	if !IsValidRole(req.Role) {
+	if !IsValidUserRole(req.Role) {
 		resp.Return(w, http.StatusBadRequest, customStatus.INVALID_PARAMS, nil)
 		return
 	}
@@ -115,6 +110,7 @@ func (u *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	input := ToModelUpdateEntity(req, user)
+	fmt.Println("input", input)
 	err = u.repo.User().Update(input)
 	if err != nil {
 		resp.Return(w, http.StatusInternalServerError, customStatus.UPDATE_USER_FAILED, nil)
@@ -173,4 +169,45 @@ func (u *UserController) ListUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp.Return(w, http.StatusOK, customStatus.SUCCESS, data)
+}
+
+func (u *UserController) UpdateRole(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	idInt, _ := strconv.Atoi(id)
+	req := &request.UpdateRoleRequest{}
+	if err := utils.BindAndValidate(r, req); err != nil {
+		resp.Return(w, http.StatusBadRequest, customStatus.INVALID_PARAMS, err.Error())
+		return
+	}
+
+	if !IsValidRole(req.Role) {
+		resp.Return(w, http.StatusBadRequest, customStatus.INVALID_PARAMS, nil)
+		return
+	}
+
+	_, role := utils.GetUserIdAndRoleFromContext(r)
+	if !IsValidSuperAdminRole(role) {
+		resp.Return(w, http.StatusForbidden, customStatus.FORBIDDEN, nil)
+		return
+	}
+
+	user, err := u.repo.User().GetById(idInt)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			resp.Return(w, http.StatusNotFound, customStatus.USER_NOT_FOUND, nil)
+			return
+		}
+
+		resp.Return(w, http.StatusInternalServerError, customStatus.INTERNAL_SERVER, err.Error())
+		return
+	}
+
+	user.Role = req.Role
+	err = u.repo.User().Update(user)
+	if err != nil {
+		resp.Return(w, http.StatusInternalServerError, customStatus.UPDATE_USER_FAILED, nil)
+		return
+	}
+
+	resp.Return(w, http.StatusOK, customStatus.SUCCESS, nil)
 }

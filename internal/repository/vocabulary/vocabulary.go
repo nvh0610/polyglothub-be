@@ -15,41 +15,53 @@ func NewVocabularyRepository(db *gorm.DB) *Implement {
 }
 
 type Vocabularies struct {
-	Id         int               `json:"id" gorm:"id"`
-	Word       string            `json:"word" gorm:"word"`
-	Meaning    string            `json:"meaning" gorm:"meaning"`
-	IPA        string            `json:"ipa" gorm:"ipa"`
-	Type       string            `json:"type" gorm:"type"`
-	Url        string            `json:"url" gorm:"url"`
-	CategoryID int               `json:"category_id" gorm:"category_id"`
-	CreatedAt  time.Time         `json:"created_at" gorm:"created_at"`
-	UpdatedAt  time.Time         `json:"updated_at" gorm:"updated_at"`
-	Examples   []*entity.Example `json:"examples" gorm:"examples"`
+	Id          int        `json:"id" gorm:"column:id"`
+	Word        string     `json:"word" gorm:"column:word"`
+	Meaning     string     `json:"meaning" gorm:"column:meaning"`
+	IPA         string     `json:"ipa" gorm:"column:ipa"`
+	Type        string     `json:"type" gorm:"column:type"`
+	Url         string     `json:"url" gorm:"column:url"`
+	Description string     `json:"description" gorm:"column:description"`
+	CategoryID  int        `json:"category_id" gorm:"column:category_id"`
+	CreatedAt   time.Time  `json:"created_at" gorm:"column:created_at"`
+	UpdatedAt   time.Time  `json:"updated_at" gorm:"column:updated_at"`
+	Examples    []*Example `json:"examples" gorm:"foreignKey:VocabularyID"`
+}
+
+type Example struct {
+	Id           int       `json:"id" gorm:"column:id"`
+	Sentence     string    `json:"sentence" gorm:"column:sentence"`
+	Meaning      string    `json:"meaning" gorm:"column:meaning"`
+	CreatedAt    time.Time `json:"created_at" gorm:"column:created_at"`
+	UpdatedAt    time.Time `json:"updated_at" gorm:"column:updated_at"`
+	VocabularyID int       `json:"vocabulary_id" gorm:"column:vocabulary_id"`
 }
 
 func (u *Implement) List(limit, offset int, categoryId int, word string) ([]*Vocabularies, int, error) {
 	var vocabularies []*Vocabularies
 	var count int64
 
-	query := u.db.Where("category_id = ?", categoryId)
+	query := u.db.Model(&Vocabularies{}).Where("category_id = ?", categoryId)
 
 	if word != "" {
 		query = query.Where("word LIKE ?", "%"+word+"%")
 	}
 
-	err := query.Model(&entity.Vocabulary{}).Count(&count).Error
+	err := query.Count(&count).Error
 	if err != nil {
 		return nil, 0, err
 	}
 
-	query = u.db.Limit(limit).Offset(offset)
-	query.Joins("JOIN examples ON examples.vocabulary_id = vocabularies.id")
-	err = query.Find(&vocabularies).Error
+	err = query.
+		Limit(limit).
+		Offset(offset).
+		Preload("Examples").Find(&vocabularies).Error
+
 	if err != nil {
 		return nil, 0, err
 	}
 
-	return vocabularies, int(count), err
+	return vocabularies, int(count), nil
 }
 
 func (u *Implement) Create(vocabulary *entity.Vocabulary) error {

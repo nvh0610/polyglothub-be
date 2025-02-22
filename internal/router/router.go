@@ -57,6 +57,14 @@ func InitRouter() chi.Router {
 		r.With(mdw.JwtMiddleware).Post("/change-password", baseController.AuthCtrl.ChangePassword)
 	})
 
+	r.Route("/vocabulary", func(r chi.Router) {
+		r.Use(mdw.JwtMiddleware)
+		r.Get("/", baseController.VocabularyCtrl.ListVocabulary)
+		r.Post("/", baseController.VocabularyCtrl.CreateVocabulary)
+		r.Put("/{id}", baseController.VocabularyCtrl.UpdateVocabulary)
+		r.Delete("/{id}", baseController.VocabularyCtrl.DeleteVocabulary)
+	})
+
 	r.Route("/category", func(r chi.Router) {
 		r.Use(mdw.JwtMiddleware)
 		r.Get("/", baseController.CategoryCtrl.ListCategory)
@@ -72,6 +80,7 @@ func InitRouter() chi.Router {
 		r.Put("/{id}", baseController.UserCtrl.UpdateUser)
 		r.Delete("/{id}", baseController.UserCtrl.DeleteUser)
 		r.Get("/", baseController.UserCtrl.ListUser)
+		r.Post("/update-role", baseController.UserCtrl.UpdateRole)
 	})
 
 	return r

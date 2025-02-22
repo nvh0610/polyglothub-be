@@ -42,6 +42,7 @@ func (m *mysqlImplement) Example() example.Repository {
 
 func NewRegistryRepo(db *gorm.DB) Registry {
 	return &mysqlImplement{
+		db:         db,
 		userRepo:   user.NewUserRepository(db),
 		category:   category.NewCategoryRepository(db),
 		vocabulary: vocabulary.NewVocabularyRepository(db),

@@ -1,6 +1,8 @@
 package response
 
-import "learn/internal/entity"
+import (
+	"learn/internal/repository/vocabulary"
+)
 
 type ExampleResponse struct {
 	Id           int    `json:"id"`
@@ -13,7 +15,7 @@ type ExamplesResponse struct {
 	Examples []ExampleResponse `json:"examples"`
 }
 
-func ToExampleResponse(example *entity.Example) *ExampleResponse {
+func ToExampleResponse(example *vocabulary.Example) *ExampleResponse {
 	return &ExampleResponse{
 		Id:           example.Id,
 		VocabularyId: example.VocabularyID,
@@ -22,7 +24,7 @@ func ToExampleResponse(example *entity.Example) *ExampleResponse {
 	}
 }
 
-func ToExamplesResponse(examples []*entity.Example) []*ExampleResponse {
+func ToExamplesResponse(examples []*vocabulary.Example) []*ExampleResponse {
 	var responses []*ExampleResponse
 	for _, example := range examples {
 		responses = append(responses, ToExampleResponse(example))
