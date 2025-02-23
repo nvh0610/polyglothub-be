@@ -8,4 +8,6 @@ type Repository interface {
 	Update(user *entity.Vocabulary) error
 	Delete(id int) error
 	List(limit, offset int, categoryId int, word string) ([]*Vocabularies, int, error)
+	CheckExistsByWord(word string, categoryId int) (bool, error)
+	GetVocabulariesByIds(ids []int) ([]*entity.Vocabulary, error)
 }

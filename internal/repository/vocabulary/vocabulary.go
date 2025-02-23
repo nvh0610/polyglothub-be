@@ -1,6 +1,7 @@
 package vocabulary
 
 import (
+	"errors"
 	"gorm.io/gorm"
 	"learn/internal/entity"
 	"time"
@@ -79,4 +80,23 @@ func (u *Implement) Delete(id int) error {
 func (u *Implement) GetById(id int) (*entity.Vocabulary, error) {
 	var vocabulary *entity.Vocabulary
 	return vocabulary, u.db.First(&vocabulary, "id = ?", id).Error
+}
+
+func (u *Implement) CheckExistsByWord(word string, categoryId int) (bool, error) {
+	var vocabulary entity.Vocabulary
+	err := u.db.First(&vocabulary, "word = ? AND category_id = ?", word, categoryId).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return true, nil
+		}
+
+		return false, err
+	}
+
+	return false, nil
+}
+
+func (u *Implement) GetVocabulariesByIds(ids []int) ([]*entity.Vocabulary, error) {
+	var vocabularies []*entity.Vocabulary
+	return vocabularies, u.db.Where("id in (?)", ids).Find(&vocabularies).Error
 }

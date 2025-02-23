@@ -2,7 +2,6 @@ package vocabulary
 
 import (
 	"errors"
-	"fmt"
 	"github.com/go-chi/chi/v5"
 	"gorm.io/gorm"
 	customStatus "learn/internal/common/error"
@@ -15,6 +14,7 @@ import (
 	"learn/pkg/utils"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type VocabularyController struct {
@@ -49,6 +49,17 @@ func (v *VocabularyController) CreateVocabulary(w http.ResponseWriter, r *http.R
 
 	if !user.IsValidAdminRole(role) && category.UserID != userId {
 		resp.Return(w, http.StatusForbidden, customStatus.FORBIDDEN, nil)
+		return
+	}
+
+	exist, err := v.repo.Vocabulary().CheckExistsByWord(strings.ToLower(req.Word), req.CategoryId)
+	if err != nil {
+		resp.Return(w, http.StatusInternalServerError, customStatus.INTERNAL_SERVER, err.Error())
+		return
+	}
+
+	if !exist {
+		resp.Return(w, http.StatusBadRequest, customStatus.VOCABULARY_ALREADY_EXISTS, nil)
 		return
 	}
 
@@ -123,10 +134,7 @@ func (v *VocabularyController) UpdateVocabulary(w http.ResponseWriter, r *http.R
 			return err
 		}
 
-		fmt.Println("inputVocabulary", inputVocabulary.Id)
 		inputExample := example.ToModelExampleEntities(req.Examples, inputVocabulary.Id)
-		fmt.Println("inputExample", inputExample[0].Id)
-		fmt.Println("inputExample", inputExample[1].Id)
 
 		err = v.repo.Example().UpsertBatch(inputExample)
 		if err != nil {

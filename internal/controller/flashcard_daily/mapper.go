@@ -1,0 +1,1 @@
+package flashcard_daily

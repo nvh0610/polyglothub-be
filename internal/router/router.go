@@ -83,5 +83,11 @@ func InitRouter() chi.Router {
 		r.Post("/update-role", baseController.UserCtrl.UpdateRole)
 	})
 
+	r.Route("/flashcard-daily", func(r chi.Router) {
+		r.Use(mdw.JwtMiddleware)
+		r.Get("/", baseController.FlashCardDailyCtrl.GetFlashCardDaily)
+		r.Post("/confirm", baseController.FlashCardDailyCtrl.ConfirmFlashCardDaily)
+	})
+
 	return r
 }

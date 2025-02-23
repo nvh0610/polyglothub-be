@@ -11,6 +11,7 @@ type Vocabulary struct {
 	Url         string    `json:"url" gorm:"url"`
 	Description string    `json:"description" gorm:"description"`
 	CategoryID  int       `json:"category_id" gorm:"category_id"`
+	Topic       string    `json:"topic" gorm:"topic"`
 	CreatedAt   time.Time `json:"created_at" gorm:"created_at;autoCreateTime"`
 	UpdatedAt   time.Time `json:"updated_at" gorm:"updated_at;autoUpdateTime"`
 }
