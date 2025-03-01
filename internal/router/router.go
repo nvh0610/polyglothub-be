@@ -54,6 +54,7 @@ func InitRouter() chi.Router {
 		r.Post("/forget-password", baseController.AuthCtrl.ForgetPassword)
 		r.Post("/verify-otp", baseController.AuthCtrl.VerifyOtp)
 		r.Post("/reset-password", baseController.AuthCtrl.ResetPassword)
+		r.Post("/", baseController.UserCtrl.CreateUser)
 		r.With(mdw.JwtMiddleware).Post("/change-password", baseController.AuthCtrl.ChangePassword)
 	})
 
@@ -76,11 +77,11 @@ func InitRouter() chi.Router {
 	r.Route("/user", func(r chi.Router) {
 		r.Use(mdw.JwtMiddleware)
 		r.Get("/{id}", baseController.UserCtrl.GetUserById)
-		r.Post("/", baseController.UserCtrl.CreateUser)
 		r.Put("/{id}", baseController.UserCtrl.UpdateUser)
 		r.Delete("/{id}", baseController.UserCtrl.DeleteUser)
 		r.Get("/", baseController.UserCtrl.ListUser)
 		r.Post("/update-role", baseController.UserCtrl.UpdateRole)
+		r.Get("/me", baseController.UserCtrl.GetMe)
 	})
 
 	r.Route("/flashcard-daily", func(r chi.Router) {

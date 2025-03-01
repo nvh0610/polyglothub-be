@@ -9,4 +9,5 @@ type Controller interface {
 	DeleteUser(w http.ResponseWriter, r *http.Request)
 	ListUser(w http.ResponseWriter, r *http.Request)
 	UpdateRole(w http.ResponseWriter, r *http.Request)
+	GetMe(w http.ResponseWriter, r *http.Request)
 }

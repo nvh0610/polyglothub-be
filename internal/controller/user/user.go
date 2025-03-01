@@ -43,6 +43,22 @@ func (u *UserController) GetUserById(w http.ResponseWriter, r *http.Request) {
 	resp.Return(w, http.StatusOK, customStatus.SUCCESS, response.ToDetailUserResponse(user))
 }
 
+func (u *UserController) GetMe(w http.ResponseWriter, r *http.Request) {
+	userId, _ := utils.GetUserIdAndRoleFromContext(r)
+	user, err := u.repo.User().GetById(userId)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			resp.Return(w, http.StatusNotFound, customStatus.USER_NOT_FOUND, nil)
+			return
+		}
+
+		resp.Return(w, http.StatusInternalServerError, customStatus.INTERNAL_SERVER, err.Error())
+		return
+	}
+
+	resp.Return(w, http.StatusOK, customStatus.SUCCESS, response.ToDetailUserResponse(user))
+}
+
 func (u *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 	req := &request.CreateUserRequest{}
 	if err := utils.BindAndValidate(r, req); err != nil {
