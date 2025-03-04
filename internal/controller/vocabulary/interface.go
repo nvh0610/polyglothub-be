@@ -7,4 +7,5 @@ type Controller interface {
 	UpdateVocabulary(w http.ResponseWriter, r *http.Request)
 	DeleteVocabulary(w http.ResponseWriter, r *http.Request)
 	ListVocabulary(w http.ResponseWriter, r *http.Request)
+	GetVocabularyById(w http.ResponseWriter, r *http.Request)
 }

@@ -27,6 +27,6 @@ func ToListCategoryResponse(categories []*entity.Category) []*DetailCategoryResp
 }
 
 type ListCategoryResponse struct {
-	PaginationResponse
-	Categories []*DetailCategoryResponse `json:"categories"`
+	PaginationResponse PaginationResponse        `json:"pagination"`
+	Categories         []*DetailCategoryResponse `json:"categories"`
 }

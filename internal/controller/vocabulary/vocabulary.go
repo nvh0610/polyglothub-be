@@ -205,6 +205,23 @@ func (v *VocabularyController) DeleteVocabulary(w http.ResponseWriter, r *http.R
 
 	resp.Return(w, http.StatusOK, customStatus.SUCCESS, nil)
 }
+func (v *VocabularyController) GetVocabularyById(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	idInt, _ := strconv.Atoi(id)
+	vocabulary, err := v.repo.Vocabulary().GetFullById(idInt)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			resp.Return(w, http.StatusNotFound, customStatus.VOCABULARY_NOT_FOUND, nil)
+			return
+		}
+
+		resp.Return(w, http.StatusInternalServerError, customStatus.INTERNAL_SERVER, err.Error())
+		return
+	}
+
+	resp.Return(w, http.StatusOK, customStatus.SUCCESS, response.ToVocabularyResponse(vocabulary))
+
+}
 
 func (v *VocabularyController) ListVocabulary(w http.ResponseWriter, r *http.Request) {
 	page, limit := utils.SetDefaultPagination(r.URL.Query())

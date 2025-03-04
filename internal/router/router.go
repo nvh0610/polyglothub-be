@@ -49,7 +49,7 @@ func InitRouter() chi.Router {
 	baseRepo := repository.NewRegistryRepo(mysqlConn)
 	baseController := controller.NewRegistryController(baseRepo, redisConn)
 
-	r.Route("/auth", func(r chi.Router) {
+	r.Route("/api/auth", func(r chi.Router) {
 		r.Post("/login", baseController.AuthCtrl.Login)
 		r.Post("/forget-password", baseController.AuthCtrl.ForgetPassword)
 		r.Post("/verify-otp", baseController.AuthCtrl.VerifyOtp)
@@ -58,15 +58,16 @@ func InitRouter() chi.Router {
 		r.With(mdw.JwtMiddleware).Post("/change-password", baseController.AuthCtrl.ChangePassword)
 	})
 
-	r.Route("/vocabulary", func(r chi.Router) {
+	r.Route("/api/vocabulary", func(r chi.Router) {
 		r.Use(mdw.JwtMiddleware)
 		r.Get("/", baseController.VocabularyCtrl.ListVocabulary)
 		r.Post("/", baseController.VocabularyCtrl.CreateVocabulary)
 		r.Put("/{id}", baseController.VocabularyCtrl.UpdateVocabulary)
 		r.Delete("/{id}", baseController.VocabularyCtrl.DeleteVocabulary)
+		r.Get("/{id}", baseController.VocabularyCtrl.GetVocabularyById)
 	})
 
-	r.Route("/category", func(r chi.Router) {
+	r.Route("/api/category", func(r chi.Router) {
 		r.Use(mdw.JwtMiddleware)
 		r.Get("/", baseController.CategoryCtrl.ListCategory)
 		r.Post("/", baseController.CategoryCtrl.CreateCategory)
@@ -74,7 +75,7 @@ func InitRouter() chi.Router {
 		r.Delete("/{id}", baseController.CategoryCtrl.DeleteCategory)
 	})
 
-	r.Route("/user", func(r chi.Router) {
+	r.Route("/api/user", func(r chi.Router) {
 		r.Use(mdw.JwtMiddleware)
 		r.Get("/{id}", baseController.UserCtrl.GetUserById)
 		r.Put("/{id}", baseController.UserCtrl.UpdateUser)
@@ -84,7 +85,7 @@ func InitRouter() chi.Router {
 		r.Get("/me", baseController.UserCtrl.GetMe)
 	})
 
-	r.Route("/flashcard-daily", func(r chi.Router) {
+	r.Route("/api/flashcard-daily", func(r chi.Router) {
 		r.Use(mdw.JwtMiddleware)
 		r.Get("/", baseController.FlashCardDailyCtrl.GetFlashCardDaily)
 		r.Post("/confirm", baseController.FlashCardDailyCtrl.ConfirmFlashCardDaily)

@@ -82,6 +82,11 @@ func (u *Implement) GetById(id int) (*entity.Vocabulary, error) {
 	return vocabulary, u.db.First(&vocabulary, "id = ?", id).Error
 }
 
+func (u *Implement) GetFullById(id int) (*Vocabularies, error) {
+	var vocabulary *Vocabularies
+	return vocabulary, u.db.Preload("Examples").First(&vocabulary, "id = ?", id).Error
+}
+
 func (u *Implement) CheckExistsByWord(word string, categoryId int) (bool, error) {
 	var vocabulary entity.Vocabulary
 	err := u.db.First(&vocabulary, "word = ? AND category_id = ?", word, categoryId).Error
