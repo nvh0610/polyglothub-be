@@ -24,6 +24,6 @@ func NewRegistryController(repo repository.Registry, redis *redis.Client) *Regis
 		AuthCtrl:           auth.NewAuthController(repo, redis),
 		CategoryCtrl:       category.NewCategoryController(repo),
 		VocabularyCtrl:     vocabulary.NewVocabularyController(repo),
-		FlashCardDailyCtrl: flashcard_daily.NewFlashcardDailyController(repo),
+		FlashCardDailyCtrl: flashcard_daily.NewFlashcardDailyController(repo, redis),
 	}
 }

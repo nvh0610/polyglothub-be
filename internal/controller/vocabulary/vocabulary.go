@@ -246,7 +246,7 @@ func (v *VocabularyController) ListVocabulary(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	vocabularies, total, err := v.repo.Vocabulary().List(limit, offset, categoryId, word)
+	vocabularies, total, err := v.repo.Vocabulary().List(limit, offset, categoryId, word, []int{})
 	if err != nil {
 		resp.Return(w, http.StatusInternalServerError, customStatus.INTERNAL_SERVER, err.Error())
 		return

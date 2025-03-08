@@ -55,3 +55,11 @@ func IntSliceToStringSlice(ints []int) []string {
 	}
 	return result
 }
+
+func StringSliceToIntSlice(strings []string) []int {
+	result := make([]int, len(strings))
+	for i, v := range strings {
+		result[i], _ = strconv.Atoi(v)
+	}
+	return result
+}

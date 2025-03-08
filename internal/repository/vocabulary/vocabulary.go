@@ -38,11 +38,18 @@ type Example struct {
 	VocabularyID int       `json:"vocabulary_id" gorm:"column:vocabulary_id"`
 }
 
-func (u *Implement) List(limit, offset int, categoryId int, word string) ([]*Vocabularies, int, error) {
+func (u *Implement) List(limit, offset int, categoryId int, word string, categoryIds []int) ([]*Vocabularies, int, error) {
 	var vocabularies []*Vocabularies
 	var count int64
 
-	query := u.db.Model(&Vocabularies{}).Where("category_id = ?", categoryId)
+	query := u.db.Model(&Vocabularies{})
+	if categoryId != 0 {
+		query = query.Where("category_id = ?", categoryId)
+	}
+
+	if len(categoryIds) > 0 {
+		query = query.Where("category_id IN (?)", categoryIds)
+	}
 
 	if word != "" {
 		query = query.Where("word LIKE ?", "%"+word+"%")

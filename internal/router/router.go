@@ -90,6 +90,7 @@ func InitRouter() chi.Router {
 		r.Use(mdw.JwtMiddleware)
 		r.Get("/", baseController.FlashCardDailyCtrl.GetFlashCardDaily)
 		r.Post("/confirm", baseController.FlashCardDailyCtrl.ConfirmFlashCardDaily)
+		r.Get("/all", baseController.FlashCardDailyCtrl.GetAllFlashCard)
 	})
 
 	return r

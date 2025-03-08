@@ -21,8 +21,8 @@ import (
 )
 
 const (
-	MaxFlashCardDaily              = 50
-	TimeCronJobFetchFlashCardDaily = "@every 0h15m0s"
+	MaxFlashCardDaily              = 5
+	TimeCronJobFetchFlashCardDaily = "@every 0h3m0s"
 )
 
 type FlashcardDailyController struct {
@@ -31,10 +31,11 @@ type FlashcardDailyController struct {
 	redis          *redis.Client
 }
 
-func NewFlashcardDailyController(repo repository.Registry) Controller {
+func NewFlashcardDailyController(repo repository.Registry, redis *redis.Client) Controller {
 	return &FlashcardDailyController{
 		repo:           repo,
 		vocabularyRepo: repo,
+		redis:          redis,
 	}
 }
 
@@ -132,9 +133,56 @@ func (f *FlashcardDailyController) ConfirmFlashCardDaily(w http.ResponseWriter, 
 	resp.Return(w, http.StatusOK, customStatus.SUCCESS, nil)
 }
 
+func (f *FlashcardDailyController) GetAllFlashCard(w http.ResponseWriter, r *http.Request) {
+	userId, _ := utils.GetUserIdAndRoleFromContext(r)
+	page, limit := utils.SetDefaultPagination(r.URL.Query())
+	offset := (page - 1) * limit
+	var categoryIds []int
+	option := r.URL.Query().Get("option")
+	if option == "private" {
+		categories, err := f.repo.Category().GetByUserId(userId)
+		if err != nil {
+			resp.Return(w, http.StatusInternalServerError, customStatus.INTERNAL_SERVER, err.Error())
+			return
+		}
+
+		for _, category := range categories {
+			categoryIds = append(categoryIds, category.Id)
+		}
+	}
+
+	vocabularies, total, err := f.repo.Vocabulary().List(limit, offset, 0, "", categoryIds)
+	if err != nil {
+		resp.Return(w, http.StatusInternalServerError, customStatus.INTERNAL_SERVER, err.Error())
+		return
+	}
+
+	data := response.ListVocabularyResponse{
+		Vocabularies: response.ToListVocabularyResponse(vocabularies),
+		PaginationResponse: response.PaginationResponse{
+			TotalPage: utils.CalculatorTotalPage(total, limit),
+			Limit:     limit,
+			Page:      page,
+		},
+	}
+
+	resp.Return(w, http.StatusOK, customStatus.SUCCESS, data)
+}
+
 func (f *FlashcardDailyController) CronJobDailyFlashcard() {
 	_, _ = schedule.RegisterScheduler(TimeCronJobFetchFlashCardDaily, func() {
 		logger.Info("cron job: fetch flashcard daily")
+		dateNow := time.Now().Format("2006-01-02")
+		flashCards, err := f.repo.FlashCardDaily().GetFlashcardDaily(dateNow)
+		if err != nil {
+			logError(err)
+			return
+		}
+
+		if len(flashCards) >= MaxFlashCardDaily {
+			return
+		}
+
 		maxId, err := f.repo.Vocabulary().GetMaxId()
 		if err != nil {
 			logError(err)
@@ -198,7 +246,7 @@ func (f *FlashcardDailyController) CronJobDailyFlashcard() {
 			return
 		}
 
-		err = f.redis.LPush(context.Background(), config.REDIS_FLASHCARD_DAILY, allVocabIds).Err()
+		err = f.redis.LPush(context.Background(), config.REDIS_FLASHCARD_DAILY, utils.IntSliceToStringSlice(allVocabIds)).Err()
 		if err != nil {
 			logError(err)
 			return
