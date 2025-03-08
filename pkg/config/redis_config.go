@@ -2,6 +2,10 @@ package config
 
 import "fmt"
 
+const (
+	REDIS_FLASHCARD_DAILY = "FLASHCARD_DAILY"
+)
+
 type RedisConfig struct {
 	Host     string
 	Port     string

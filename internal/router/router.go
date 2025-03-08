@@ -48,6 +48,7 @@ func InitRouter() chi.Router {
 
 	baseRepo := repository.NewRegistryRepo(mysqlConn)
 	baseController := controller.NewRegistryController(baseRepo, redisConn)
+	baseController.FlashCardDailyCtrl.CronJobDailyFlashcard()
 
 	r.Route("/api/auth", func(r chi.Router) {
 		r.Post("/login", baseController.AuthCtrl.Login)

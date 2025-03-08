@@ -11,4 +11,5 @@ type Repository interface {
 	CheckExistsByWord(word string, categoryId int) (bool, error)
 	GetVocabulariesByIds(ids []int) ([]*entity.Vocabulary, error)
 	GetFullById(id int) (*Vocabularies, error)
+	GetMaxId() (int, error)
 }

@@ -1,13 +1,17 @@
 package flashcard_daily
 
 import (
+	"context"
 	"errors"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 	customStatus "learn/internal/common/error"
 	"learn/internal/entity"
 	"learn/internal/repository"
 	"learn/internal/router/payload/request"
 	"learn/internal/router/payload/response"
+	"learn/job/schedule"
+	"learn/pkg/config"
 	"learn/pkg/logger"
 	"learn/pkg/resp"
 	"learn/pkg/utils"
@@ -16,13 +20,21 @@ import (
 	"time"
 )
 
+const (
+	MaxFlashCardDaily              = 50
+	TimeCronJobFetchFlashCardDaily = "@every 0h15m0s"
+)
+
 type FlashcardDailyController struct {
-	repo repository.Registry
+	repo           repository.Registry
+	vocabularyRepo repository.Registry
+	redis          *redis.Client
 }
 
-func NewFlashcardDailyController(flashcardDailyRepo repository.Registry) Controller {
+func NewFlashcardDailyController(repo repository.Registry) Controller {
 	return &FlashcardDailyController{
-		repo: flashcardDailyRepo,
+		repo:           repo,
+		vocabularyRepo: repo,
 	}
 }
 
@@ -85,6 +97,17 @@ func (f *FlashcardDailyController) ConfirmFlashCardDaily(w http.ResponseWriter, 
 	}
 
 	isCorrect := strings.EqualFold(vocabulary.Word, req.Answer)
+	switch req.Type {
+	case "word":
+		isCorrect = strings.EqualFold(vocabulary.Meaning, req.Answer)
+		req.Answer = vocabulary.Word
+	case "meaning":
+		isCorrect = strings.EqualFold(vocabulary.Word, req.Answer)
+	case "ipa":
+		isCorrect = strings.EqualFold(vocabulary.Word, req.Answer)
+	case "audio":
+		isCorrect = strings.EqualFold(vocabulary.Word, req.Answer)
+	}
 
 	flashCardLog, err := f.repo.UserFlashCardLog().GetByUserIdAndDateAndVocabularyIdAndIsCorrect(userId, dateNow, req.VocabularyId, true)
 	if err != nil {
@@ -101,12 +124,86 @@ func (f *FlashcardDailyController) ConfirmFlashCardDaily(w http.ResponseWriter, 
 
 	go f.processFlashcardLog(userId, req.VocabularyId, req.Answer, isCorrect, dateNow)
 
-	if !isCorrect {
-		resp.Return(w, http.StatusBadRequest, customStatus.WRONG_ANSWER, nil)
-		return
-	}
+	//if !isCorrect {
+	//	resp.Return(w, http.StatusBadRequest, customStatus.WRONG_ANSWER, nil)
+	//	return
+	//}
 
 	resp.Return(w, http.StatusOK, customStatus.SUCCESS, nil)
+}
+
+func (f *FlashcardDailyController) CronJobDailyFlashcard() {
+	_, _ = schedule.RegisterScheduler(TimeCronJobFetchFlashCardDaily, func() {
+		logger.Info("cron job: fetch flashcard daily")
+		maxId, err := f.repo.Vocabulary().GetMaxId()
+		if err != nil {
+			logError(err)
+			return
+		}
+
+		usedIDs := f.redis.LRange(context.Background(), config.REDIS_FLASHCARD_DAILY, 0, -1).Val()
+		var vocabularies []*entity.Vocabulary
+		var allVocabIds []int
+
+		for len(vocabularies) < MaxFlashCardDaily {
+			remainingCount := MaxFlashCardDaily - len(vocabularies)
+
+			randomIDs := utils.GenerateRandomNumbers(remainingCount, maxId, usedIDs)
+			if len(randomIDs) == 0 {
+				for i := 0; i < remainingCount; i++ {
+					oldID, err := f.redis.RPop(context.Background(), config.REDIS_FLASHCARD_DAILY).Int()
+					if err != nil {
+						break
+					}
+					randomIDs = append(randomIDs, oldID)
+				}
+				if len(randomIDs) == 0 {
+					break
+				}
+			}
+
+			newVocabs, err := f.repo.Vocabulary().GetVocabulariesByIds(randomIDs)
+			if err != nil {
+				logError(err)
+				return
+			}
+
+			vocabularies = append(vocabularies, newVocabs...)
+
+			for _, vocab := range newVocabs {
+				allVocabIds = append(allVocabIds, vocab.Id)
+			}
+
+			usedIDs = append(usedIDs, utils.IntSliceToStringSlice(randomIDs)...)
+		}
+
+		if len(vocabularies) == 0 {
+			logError(errors.New("no vocabularies found"))
+			return
+		}
+
+		entityFlashCards := make([]*entity.FlashcardDaily, len(vocabularies))
+		today := getTodayDate()
+
+		for i, vocabulary := range vocabularies {
+			entityFlashCards[i] = &entity.FlashcardDaily{
+				VocabularyId: vocabulary.Id,
+				Date:         today,
+			}
+		}
+
+		err = f.repo.FlashCardDaily().CreateBatch(entityFlashCards)
+		if err != nil {
+			logError(err)
+			return
+		}
+
+		err = f.redis.LPush(context.Background(), config.REDIS_FLASHCARD_DAILY, allVocabIds).Err()
+		if err != nil {
+			logError(err)
+			return
+		}
+	})
 }
 
 func (f *FlashcardDailyController) processFlashcardLog(userId, vocabularyId int, answer string, isCorrect bool, dateNow string) {

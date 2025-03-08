@@ -2,7 +2,6 @@ package user
 
 import (
 	"errors"
-	"fmt"
 	"github.com/go-chi/chi/v5"
 	"gorm.io/gorm"
 	customStatus "learn/internal/common/error"
@@ -126,7 +125,6 @@ func (u *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	input := ToModelUpdateEntity(req, user)
-	fmt.Println("input", input)
 	err = u.repo.User().Update(input)
 	if err != nil {
 		resp.Return(w, http.StatusInternalServerError, customStatus.UPDATE_USER_FAILED, nil)

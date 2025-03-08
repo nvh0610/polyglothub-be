@@ -105,3 +105,9 @@ func (u *Implement) GetVocabulariesByIds(ids []int) ([]*entity.Vocabulary, error
 	var vocabularies []*entity.Vocabulary
 	return vocabularies, u.db.Where("id in (?)", ids).Find(&vocabularies).Error
 }
+
+func (u *Implement) GetMaxId() (int, error) {
+	var maxId int
+	err := u.db.Model(&entity.Vocabulary{}).Select("MAX(id)").Scan(&maxId).Error
+	return maxId, err
+}
