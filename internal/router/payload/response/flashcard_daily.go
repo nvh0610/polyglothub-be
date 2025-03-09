@@ -1,6 +1,10 @@
 package response
 
-import "learn/internal/entity"
+import (
+	"learn/internal/entity"
+	"learn/internal/repository/user_daily_word_statistic"
+	"math"
+)
 
 type FlashcardDailyResponse struct {
 	VocabularyId int    `json:"vocabulary_id"`
@@ -33,4 +37,30 @@ func ToFlashcardDailyResponse(vocabulary []*entity.Vocabulary) *FlashcardDailies
 	return &FlashcardDailiesResponse{
 		Flashcards: flashcards,
 	}
+}
+
+type DashboardFlashcardResponse struct {
+	Username      string `json:"username"`
+	NumberCorrect int    `json:"number_correct"`
+	NumberWrong   int    `json:"number_wrong"`
+	Percent       int    `json:"percent"`
+}
+
+type DashboardFlashcardsResponse struct {
+	Report             []*DashboardFlashcardResponse `json:"report"`
+	PaginationResponse PaginationResponse            `json:"pagination"`
+}
+
+func ToDashboardFlashcardResponse(dashboard []*user_daily_word_statistic.DashboardResponse) []*DashboardFlashcardResponse {
+	var report []*DashboardFlashcardResponse
+	for _, item := range dashboard {
+		report = append(report, &DashboardFlashcardResponse{
+			Username:      item.Fullname,
+			NumberCorrect: item.CorrectAnswers,
+			NumberWrong:   item.WrongAnswers,
+			Percent:       int(math.Round(float64(item.CorrectAnswers) * 100 / float64(item.CorrectAnswers+item.WrongAnswers))),
+		})
+	}
+
+	return report
 }

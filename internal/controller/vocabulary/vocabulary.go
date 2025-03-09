@@ -228,6 +228,7 @@ func (v *VocabularyController) ListVocabulary(w http.ResponseWriter, r *http.Req
 	userId, _ := utils.GetUserIdAndRoleFromContext(r)
 	categoryId, _ := strconv.Atoi(r.URL.Query().Get("category_id"))
 	word := r.URL.Query().Get("word")
+	typeVocab := r.URL.Query().Get("data_type")
 	offset := (page - 1) * limit
 
 	category, err := v.repo.Category().GetById(categoryId)
@@ -246,7 +247,7 @@ func (v *VocabularyController) ListVocabulary(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	vocabularies, total, err := v.repo.Vocabulary().List(limit, offset, categoryId, word, []int{})
+	vocabularies, total, err := v.repo.Vocabulary().List(limit, offset, categoryId, word, []int{}, typeVocab)
 	if err != nil {
 		resp.Return(w, http.StatusInternalServerError, customStatus.INTERNAL_SERVER, err.Error())
 		return

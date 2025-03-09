@@ -6,4 +6,5 @@ type Repository interface {
 	Create(userDailyWordStatistic *entity.UserDailyWordStatistics) error
 	Update(userDailyWordStatistic *entity.UserDailyWordStatistics) error
 	GetByUserIdAndDate(userId int, date string) (*entity.UserDailyWordStatistics, error)
+	GetByDate(startDate, endDate string, limit, offset int) ([]*DashboardResponse, int, error)
 }

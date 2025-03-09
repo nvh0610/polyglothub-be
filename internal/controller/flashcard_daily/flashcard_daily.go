@@ -151,7 +151,7 @@ func (f *FlashcardDailyController) GetAllFlashCard(w http.ResponseWriter, r *htt
 		}
 	}
 
-	vocabularies, total, err := f.repo.Vocabulary().List(limit, offset, 0, "", categoryIds)
+	vocabularies, total, err := f.repo.Vocabulary().List(limit, offset, 0, "", categoryIds, "")
 	if err != nil {
 		resp.Return(w, http.StatusInternalServerError, customStatus.INTERNAL_SERVER, err.Error())
 		return
@@ -252,6 +252,36 @@ func (f *FlashcardDailyController) CronJobDailyFlashcard() {
 			return
 		}
 	})
+}
+
+func (f *FlashcardDailyController) GetDashboard(w http.ResponseWriter, r *http.Request) {
+	startDate := r.URL.Query().Get("start_date")
+	endDate := r.URL.Query().Get("end_date")
+	page, limit := utils.SetDefaultPagination(r.URL.Query())
+	offset := (page - 1) * limit
+	if startDate == "" {
+		startDate = time.Now().Format("2006-01-02")
+	}
+	if endDate == "" {
+		endDate = time.Now().Format("2006-01-02")
+	}
+
+	userDailyWordStatistics, total, err := f.repo.UserDailyWordStatistics().GetByDate(startDate, endDate, limit, offset)
+	if err != nil {
+		resp.Return(w, http.StatusInternalServerError, customStatus.INTERNAL_SERVER, err.Error())
+		return
+	}
+
+	data := response.DashboardFlashcardsResponse{
+		Report: response.ToDashboardFlashcardResponse(userDailyWordStatistics),
+		PaginationResponse: response.PaginationResponse{
+			TotalPage: utils.CalculatorTotalPage(total, limit),
+			Limit:     limit,
+			Page:      page,
+		},
+	}
+
+	resp.Return(w, http.StatusOK, customStatus.SUCCESS, data)
 }
 
 func (f *FlashcardDailyController) processFlashcardLog(userId, vocabularyId int, answer string, isCorrect bool, dateNow string) {

@@ -91,6 +91,7 @@ func InitRouter() chi.Router {
 		r.Get("/", baseController.FlashCardDailyCtrl.GetFlashCardDaily)
 		r.Post("/confirm", baseController.FlashCardDailyCtrl.ConfirmFlashCardDaily)
 		r.Get("/all", baseController.FlashCardDailyCtrl.GetAllFlashCard)
+		r.Get("/dashboard", baseController.FlashCardDailyCtrl.GetDashboard)
 	})
 
 	return r

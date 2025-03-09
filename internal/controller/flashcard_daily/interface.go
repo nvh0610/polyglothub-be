@@ -7,4 +7,5 @@ type Controller interface {
 	ConfirmFlashCardDaily(w http.ResponseWriter, r *http.Request)
 	CronJobDailyFlashcard()
 	GetAllFlashCard(w http.ResponseWriter, r *http.Request)
+	GetDashboard(w http.ResponseWriter, r *http.Request)
 }

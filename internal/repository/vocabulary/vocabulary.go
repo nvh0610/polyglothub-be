@@ -38,7 +38,7 @@ type Example struct {
 	VocabularyID int       `json:"vocabulary_id" gorm:"column:vocabulary_id"`
 }
 
-func (u *Implement) List(limit, offset int, categoryId int, word string, categoryIds []int) ([]*Vocabularies, int, error) {
+func (u *Implement) List(limit, offset int, categoryId int, word string, categoryIds []int, typeVocab string) ([]*Vocabularies, int, error) {
 	var vocabularies []*Vocabularies
 	var count int64
 
@@ -53,6 +53,10 @@ func (u *Implement) List(limit, offset int, categoryId int, word string, categor
 
 	if word != "" {
 		query = query.Where("word LIKE ?", "%"+word+"%")
+	}
+
+	if typeVocab != "" {
+		query = query.Where("type = ?", typeVocab)
 	}
 
 	err := query.Count(&count).Error
