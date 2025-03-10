@@ -29,6 +29,8 @@ type FlashcardDailyController struct {
 	repo           repository.Registry
 	vocabularyRepo repository.Registry
 	redis          *redis.Client
+	maxFlashCard   int
+	timeCronJob    string
 }
 
 func NewFlashcardDailyController(repo repository.Registry, redis *redis.Client) Controller {
@@ -36,6 +38,8 @@ func NewFlashcardDailyController(repo repository.Registry, redis *redis.Client) 
 		repo:           repo,
 		vocabularyRepo: repo,
 		redis:          redis,
+		maxFlashCard:   config.MaxFlashCardDaily(),
+		timeCronJob:    config.CronJobFetchFlashCardDaily(),
 	}
 }
 
@@ -170,7 +174,7 @@ func (f *FlashcardDailyController) GetAllFlashCard(w http.ResponseWriter, r *htt
 }
 
 func (f *FlashcardDailyController) CronJobDailyFlashcard() {
-	_, _ = schedule.RegisterScheduler(TimeCronJobFetchFlashCardDaily, func() {
+	_, _ = schedule.RegisterScheduler(config.CronJobFetchFlashCardDaily(), func() {
 		logger.Info("cron job: fetch flashcard daily")
 		dateNow := time.Now().Format("2006-01-02")
 		flashCards, err := f.repo.FlashCardDaily().GetFlashcardDaily(dateNow)
@@ -179,7 +183,7 @@ func (f *FlashcardDailyController) CronJobDailyFlashcard() {
 			return
 		}
 
-		if len(flashCards) >= MaxFlashCardDaily {
+		if len(flashCards) >= f.maxFlashCard {
 			return
 		}
 
@@ -193,8 +197,8 @@ func (f *FlashcardDailyController) CronJobDailyFlashcard() {
 		var vocabularies []*entity.Vocabulary
 		var allVocabIds []int
 
-		for len(vocabularies) < MaxFlashCardDaily {
-			remainingCount := MaxFlashCardDaily - len(vocabularies)
+		for len(vocabularies) < f.maxFlashCard {
+			remainingCount := f.maxFlashCard - len(vocabularies)
 
 			randomIDs := utils.GenerateRandomNumbers(remainingCount, maxId, usedIDs)
 			if len(randomIDs) == 0 {

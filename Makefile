@@ -16,20 +16,20 @@ migrate-down:
 	migrate -path $(MIGRATION_DIR) -database "$(DATABASE__TYPE)://$(DATABASE__USER):$(DATABASE__PASSWORD)@tcp($(DATABASE__HOST):$(DATABASE__PORT))/$(DATABASE__NAME)" down
 
 docker-run:
-	docker run --name mysql-learn-language -e MYSQL_ROOT_PASSWORD=123456 -e MYSQL_DATABASE=learn-language -p 3306:3306 -d mysql:latest
-	docker run --name redis-learn-language -p 6379:6379 -d redis:latest
+	docker run --name $(MYSQL_CONTAINER_NAME) -e MYSQL_ROOT_PASSWORD=$(DATABASE__PASSWORD) -e MYSQL_DATABASE=$(DATABASE__NAME) -p $(DATABASE__PORT):3306 -d mysql:latest
+	docker run --name $(REDIS_CONTAINER_NAME) -p $(REDIS_PORT):6379 -d redis:latest
 
 docker-stop:
-	docker stop mysql-learn-language
-	docker rm mysql-learn-language
-	docker stop redis-learn-language
-	docker rm redis-learn-language
+	docker stop $(MYSQL_CONTAINER_NAME)
+	docker rm $(MYSQL_CONTAINER_NAME)
+	docker stop $(REDIS_CONTAINER_NAME)
+	docker rm $(REDIS_CONTAINER_NAME)
 
 
 setup:
 	make docker-run
 	@echo "Waiting for MySQL to be ready..."
-	@until docker exec mysql-learn-language mysql -u$(DATABASE__USER) -p$(DATABASE__PASSWORD) -e "SELECT 1" > /dev/null 2>&1; do \
+	@until docker exec $(MYSQL_CONTAINER_NAME) mysql -u$(DATABASE__USER) -p$(DATABASE__PASSWORD) -e "SELECT 1" > /dev/null 2>&1; do \
 		echo "Waiting for MySQL..."; \
 		sleep 5; \
 	done
