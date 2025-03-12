@@ -16,8 +16,8 @@ migrate-down:
 	migrate -path $(MIGRATION_DIR) -database "$(DATABASE__TYPE)://$(DATABASE__USER):$(DATABASE__PASSWORD)@tcp($(DATABASE__HOST):$(DATABASE__PORT))/$(DATABASE__NAME)" down
 
 docker-run:
-	docker run --name $(MYSQL_CONTAINER_NAME) -e MYSQL_ROOT_PASSWORD=$(DATABASE__PASSWORD) -e MYSQL_DATABASE=$(DATABASE__NAME) -p $(DATABASE__PORT):3306 -d mysql:latest
-	docker run --name $(REDIS_CONTAINER_NAME) -p $(REDIS_PORT):6379 -d redis:latest
+	docker run --name $(MYSQL_CONTAINER_NAME) --network my-network -e MYSQL_ROOT_PASSWORD=$(DATABASE__PASSWORD) -e MYSQL_DATABASE=$(DATABASE__NAME) -p $(DATABASE__PORT):3306 -d mysql:latest
+	docker run --name $(REDIS_CONTAINER_NAME) --network my-network -p $(REDIS_PORT):6379 -d redis:latest
 
 docker-stop:
 	docker stop $(MYSQL_CONTAINER_NAME)
