@@ -13,14 +13,34 @@ func NewUserRepository(db *gorm.DB) *Implement {
 	return &Implement{db: db}
 }
 
-func (u *Implement) GetById(id int) (entity.User, error) {
-	var user entity.User
+func (u *Implement) GetById(id int) (*entity.User, error) {
+	var user *entity.User
 	return user, u.db.First(&user, "id = ?", id).Error
 }
 
-func (u *Implement) List(limit, offset int) ([]entity.User, error) {
-	var users []entity.User
-	return users, u.db.Limit(limit).Offset(offset).Find(&users).Error
+func (u *Implement) GetByUsername(username string) (*entity.User, error) {
+	var user *entity.User
+	return user, u.db.First(&user, "username = ?", username).Error
+}
+
+func (u *Implement) CheckExistsByUsername(username string) (bool, error) {
+	var user entity.User
+	return user.Id != 0, u.db.First(&user, "username = ?", username).Error
+}
+
+func (u *Implement) List(limit, offset int) ([]*entity.User, int, error) {
+	var users []*entity.User
+	var count int64
+	err := u.db.Limit(limit).Offset(offset).Find(&users).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	if err = u.db.Model(&entity.User{}).Count(&count).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return users, int(count), err
 }
 
 func (u *Implement) Create(user *entity.User) error {
