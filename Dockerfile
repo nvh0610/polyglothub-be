@@ -10,5 +10,4 @@ RUN set -x && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -
     ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 COPY --from=builder /app/server /app/server
-COPY --from=builder /app/.env /.env
 CMD ["/app/server"]
