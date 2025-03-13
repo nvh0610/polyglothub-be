@@ -39,10 +39,13 @@ jobs:
           key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
           known_hosts: unnecessary
 
+      - name: Remove old known hosts
+        run: rm -f ~/.ssh/known_hosts
+
       - name: Adding known hosts
         run: ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Deploy to EC2 instance
+      - name: Deploy to VPS instance
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.VPS_SSH_HOST }}
