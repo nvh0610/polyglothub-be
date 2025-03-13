@@ -38,7 +38,7 @@ func (u *Implement) GetByDate(startDate, endDate string, limit, offset int) ([]*
 
 	query := u.db.Table("user_daily_word_statistics AS u").
 		Select("u2.fullname, SUM(u.correct_answers) AS total_correct_answers, SUM(u.wrong_answers) AS total_wrong_answers").
-		Joins("JOIN `learn-language`.users u2 ON u2.id = u.user_id").
+		Joins("JOIN users u2 ON u2.id = u.user_id").
 		Where("u.date BETWEEN ? AND ?", startDate, endDate).
 		Group("u2.fullname")
 
