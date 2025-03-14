@@ -78,6 +78,7 @@ jobs:
               -e SENDER_EMAIL='${{ secrets.SENDER_EMAIL }}' \
               -e API_KEY_EMAIL='${{ secrets.API_KEY_EMAIL }}' \
               -e REDIS_HOST='${{ secrets.REDIS_HOST }}' \
+              -e REDIS_PORT='${{ secrets.REDIS_PORT }}' \
               -e REDIS_USERNAME='${{ secrets.REDIS_USERNAME }}' \
               -e REDIS_DB='${{ secrets.REDIS_DB }}' \
               -e REDIS_CONTAINER_NAME='${{ secrets.REDIS_CONTAINER_NAME }}' \
