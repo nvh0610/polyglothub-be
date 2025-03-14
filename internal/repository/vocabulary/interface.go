@@ -12,4 +12,5 @@ type Repository interface {
 	GetVocabulariesByIds(ids []int) ([]*entity.Vocabulary, error)
 	GetFullById(id int) (*Vocabularies, error)
 	GetMaxId() (int, error)
+	Count() (int64, error)
 }

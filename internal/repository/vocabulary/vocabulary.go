@@ -122,3 +122,8 @@ func (u *Implement) GetMaxId() (int, error) {
 	err := u.db.Model(&entity.Vocabulary{}).Select("MAX(id)").Scan(&maxId).Error
 	return maxId, err
 }
+
+func (u *Implement) Count() (int64, error) {
+	var count int64
+	return count, u.db.Model(&entity.Vocabulary{}).Count(&count).Error
+}
